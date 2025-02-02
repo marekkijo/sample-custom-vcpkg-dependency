@@ -1,5 +1,7 @@
 #pragma once
 
+#include "dependency/dependency_export.hpp"
+
 namespace dependency {
-void do_something();
+LIBDEPENDENCY_API void do_something();
 }
