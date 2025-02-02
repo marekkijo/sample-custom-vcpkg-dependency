@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(libdependency CXX)
+project(libdependency VERSION 0.0.3 LANGUAGES CXX)
 
 include(GNUInstallDirs)
 
@@ -26,16 +26,45 @@ set_target_properties(
 )
 
 if(BUILD_SHARED_LIBS)
-  target_compile_definitions(${PROJECT_NAME} PRIVATE LIBDEPENDENCY_EXPORTS)
-  target_compile_definitions(${PROJECT_NAME} PUBLIC LIBDEPENDENCY_SHARED)
-else()
-  target_compile_definitions(${PROJECT_NAME} PUBLIC LIBDEPENDENCY_STATIC)
+  target_compile_definitions(${PROJECT_NAME} PRIVATE LIBDEPENDENCY_EXPORTS INTERFACE LIBDEPENDENCY_IMPORTS)
 endif()
 
 install(
   TARGETS ${PROJECT_NAME}
+  EXPORT libdependencyTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dependency
 )
+
+install(
+  EXPORT libdependencyTargets
+  FILE libdependencyTargets.cmake
+  NAMESPACE libdependency::
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/share/${PROJECT_NAME}/cmake
+)
+
+include(CMakePackageConfigHelpers)
+
+write_basic_package_version_file(
+  libdependencyConfigVersion.cmake
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+configure_file(
+  libdependencyConfig.cmake.in
+  libdependencyConfig.cmake
+  @ONLY
+)
+
+install(
+  FILES
+  libdependencyConfig.cmake
+  libdependencyConfigVersion.cmake
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/share/${PROJECT_NAME}/cmake
+)
+
+#file(REMOVE_RECURSE "${CURRENT_PACKAGES_DIR}/debug/include")
